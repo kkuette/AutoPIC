@@ -1,0 +1,435 @@
+PROJECT ANALYSIS - SHEET AUTOMATION
+
+1. ESI INTEGRATION
+-----------------
+Required Endpoints:
+- /characters/{id}/industry/jobs/
+- /markets/prices/
+- /corporations/{id}/assets/
+- /universe/types/{type_id}/
+
+Authentication:
+- SSO Token Management
+- Refresh Token Handling
+- Required Scopes:
+  * esi-industry.read_corporation_jobs.v1
+  * esi-assets.read_corporation_assets.v1
+
+2. SPREADSHEET STRUCTURE
+-----------------------
+Working with Template:
+1. Template Format
+   - Uses existing CSV format
+   - Material Input System:
+     * Paste Area for Raw Data
+     * Column Structure:
+       - Name
+       - To Buy
+       - To Buy (Sell-Value)
+       - To Buy Volume
+       - Start Amount
+       - End Amount
+     * Data Processing:
+       - Auto-format numbers
+       - Calculate totals
+       - Validate inputs
+       - Remove empty rows
+   - Sections:
+     * Project Overview
+     * Jobs Tables (4 types):
+       - Name, Runs, Days, Job Cost columns
+       - Type identification
+     * Materials List:
+       - Name, To Buy, To Buy (Sell-Value), To Buy Volume
+
+   Job Input System:
+   - Job Type Selection:
+     * BPC/BPO
+     * Reactions
+     * Components
+     * Final Products
+
+   - Data Input Format:
+     * Headers:
+       - Name
+       - Runs
+       - Days
+       - Job Cost
+     * Validation:
+       - Job type matching
+       - Formula validation
+       - Cost calculation
+       - Timeline checks
+
+   - Processing Features:
+     * Auto-categorize jobs
+     * Calculate timelines
+     * Sum total costs
+     * Validate dependencies
+
+   Job Categories & BPC/BPO Handling:
+   1. Reactions
+      - Direct job input
+      - No BPC/BPO requirements
+      - Standard job format
+
+   2. Components/Final Products
+      - Job input generates BPC/BPO entries
+      - Auto-calculation of:
+        * Copy jobs needed
+        * Research requirements
+        * ME/TE levels
+        * Run calculations
+      - BPC/BPO fee structure applied automatically
+
+   BPC/BPO Auto-Generation:
+   - Derived from component/product jobs
+   - Automatic fee calculation
+   - Location tracking
+   - Timeline integration
+
+2. Project Creation:
+   - Direct copy of template format
+   - Tab naming: "CORE[NUMBER]"
+   - Preserve existing column structure
+   - Maintain formulas
+
+3. Data Validation
+   - Match template format
+   - Validate input data
+   - Check cell formats
+   - Preserve calculations
+
+2. Data Processing
+   - Parse pasted material data
+   - Clean formatting
+   - Apply formulas
+   - Update calculations
+
+Project Sheet Layout:
+- One master sheet per project
+- Standardized categories
+- Shared settings
+
+Sheet Categories:
+1. Project Dashboard
+   - Financial Overview
+   - Timeline Status
+   - Contributor List
+   - Progress Summary
+
+2. BPC & BPO Management
+   - Blueprint Inventory
+   - Copy Jobs
+   - Research Jobs
+   - ME/TE Tracking
+   - Run Calculations
+   
+   Fee Structure:
+   - Daily Location Fee: 1,000,000 ISK
+   - Run Rates by Type:
+     * T1 Components: 250 ISK/run
+     * T1 Modules: 10,000 ISK/run
+     * T1 Ships: 100,000 ISK/run
+     * T2 Modules: 100,000 ISK/run
+     * T2 Ships: 2,500,000 ISK/run
+     * Capital T1: 25,000 ISK/run
+     * Capital T2: 125,000 ISK/run
+
+   Fee Calculator:
+   - Total Fee = (Days × Daily Rate) + (Runs × Type Rate)
+   - Auto-assignment to contributor
+   - Payment tracking
+   - Fee history
+
+3. Reactions
+   - Reaction Jobs
+   - Input Materials
+   - Output Products
+   - Chain Dependencies
+   - Facility Allocation
+
+4. Components
+   - Capital Components
+   - Advanced Components
+   - Production Lines
+   - Material Requirements
+   - Job Sequences
+
+5. Final Products
+   - Assembly Jobs
+   - Component Usage
+   - Completion Status
+   - Delivery Planning
+
+6. Shared Resources
+   - Material Tracker
+   - Market Data
+   - ESI Integration
+   - Settings Panel
+
+7. Contributor Activities
+   - Job Management
+     * Job submission interface
+     * Material requirements check
+     * Production line availability
+     * Time estimation
+
+   - Material Contribution
+     * Material deposit tracking
+     * Value calculation
+     * Container verification
+     * Asset movement logging
+
+   - Reward System
+     * Contribution percentage
+     * Value calculation
+       - Material value
+       - Job costs
+       - Time investment
+     * Profit distribution
+     * Activity history
+
+   - Permission Controls
+     * Job start validation
+     * Material acceptance
+     * Progress reporting
+     * Cost tracking
+
+8. Automated Tracking
+   - Job Attribution
+     * Who started what
+     * Time invested
+     * Resources used
+     * Completion status
+
+   - Material Flow
+     * Who contributed what
+     * When deposited
+     * Value at time
+     * Usage tracking
+
+   - Reward Distribution
+     * Real-time calculations
+     * Contribution metrics
+     * Profit sharing
+     * Payment tracking
+
+9. Job Synchronization
+   - ESI Job Monitoring
+     * Periodic job scanning
+     * Auto-detection of new jobs
+     * Validation against sheet
+     * Orphaned job alerts
+
+   - Job Reconciliation
+     * Match ESI jobs to sheet entries
+     * Flag unauthorized jobs
+     * Material usage tracking
+     * Cost allocation updates
+
+   - Alerting System
+     * Unauthorized job notifications
+     * Material allocation conflicts
+     * Production line conflicts
+     * Resource depletion warnings
+
+Production Controls:
+- Category-specific validations
+- Cross-category dependencies
+- Resource allocation
+- Progress tracking
+
+3. APPS SCRIPT MODULES
+---------------------
+Core Modules:
+1. ESIManager
+   - handleAuth()
+   - refreshTokens()
+   - fetchESIData()
+   - parseResponse()
+
+2. JobManager
+   - pullESIJobs()
+   - validateNewJob()
+   - checkMaterialAvailability()
+   - syncWithESI()
+
+3. MaterialTracker
+   - fetchESIAssets()
+   - matchContainers()
+   - calculateUsage()
+   - syncInventory()
+
+4. MarketManager
+   - getMarketPrices()
+   - updateCosts()
+   - trackOrders()
+
+5. ContributorManager
+   - validateContribution()
+   - trackMaterialDeposit()
+   - calculateRewards()
+   - distributeProfit()
+   - logActivity()
+
+6. RewardCalculator
+   - materialValue()
+   - jobCostShare()
+   - timeInvestment()
+   - profitSplit()
+   - calculateBPFees()
+     * getDailyRate()
+     * getRunRate(bpType)
+     * calculateTotalFee(days, runs, bpType)
+     * trackFeePayment()
+
+7. JobSyncManager
+   - scanNewESIJobs()
+   - matchSheetEntries()
+   - detectUnauthorized()
+   - reconcileMaterials()
+   - alertUnmatchedJobs()
+   - validateJobOwnership()
+   - checkMaterialImpact()
+   - updateProjectStatus()
+
+8. AlertManager
+   - sendUnauthorizedJobAlert()
+   - notifyMaterialConflict()
+   - trackResourceDepletion()
+   - notifyProjectManager()
+
+9. TemplateManager
+   - createNewProject(projectName)
+   - copyTemplate()
+   - initializeSheets()
+   - populateJobsData()
+   - setupMaterialsList()
+   - validateInputs()
+   - setupFormulas()
+   - linkESIData()
+
+10. ProjectSetup
+    - getUserInput()
+    - parseJobsData()
+    - parseMaterialsList()
+    - setupCalculations()
+    - initializeTracking
+
+11. TabManager
+    - createFromTemplate()
+    - validateFormat()
+    - syncTemplateStructure()
+    - maintainFormulas()
+
+12. MaterialInputManager
+    - handlePastedData()
+    - cleanFormatting()
+    - validateMaterialList()
+    - updateCalculations()
+    - checkRequiredMaterials()
+    - processVolumes()
+    - calculateTotals()
+
+13. InputValidator
+    - checkDataFormat()
+    - validateNumbers()
+    - cleanupSpaces()
+    - formatCurrency()
+    - validateMaterialNames()
+    - checkRequiredColumns()
+
+14. JobInputManager
+    - handleJobData()
+    - categorizeJobs()
+    - validateJobType()
+    - processBatchInput()
+    - calculateTimelines()
+    - validateDependencies()
+    - updateJobTotals()
+    - checkJobConstraints()
+    - generateBPCRequirements()
+    - calculateBPCFees()
+    - trackBPCLocations()
+
+15. JobValidator
+    - checkJobFormat()
+    - validateJobNames()
+    - checkRunNumbers()
+    - validateCosts()
+    - verifyTimelines()
+    - checkDuplicates()
+    - validateFacilities()
+
+16. JobProcessor
+    - processJobBatch()
+    - sortByCategory()
+    - calculateResourceNeeds()
+    - updateMaterialRequirements()
+    - linkDependentJobs()
+    - generateJobSequence()
+
+4. AUTOMATION FLOWS
+------------------
+ESI Updates:
+1. Token Validation
+2. Data Fetching
+3. Sheet Updates
+4. Error Handling
+
+Job Management:
+1. ESI Job Status Check
+2. Material Reservation
+3. Progress Tracking
+4. Container Updates
+
+Job Validation:
+1. Regular ESI polling
+2. Sheet reconciliation
+3. Conflict detection
+4. Alert distribution
+5. Material adjustment
+6. Cost recalculation
+
+5. ERROR HANDLING
+----------------
+ESI Specific:
+- Rate limiting
+- Token expiration
+- Server errors
+- Data validation
+
+Recovery:
+- Auto token refresh
+- Retry logic
+- Cache management
+- Error logging
+
+6. CACHE MANAGEMENT
+------------------
+ESI Data:
+- Market prices: 1h
+- Industry jobs: 5m
+- Assets: 1h
+- Types: 24h
+
+Local Storage:
+- Token cache
+- Response data
+- Error states
+- Job history
+
+7. PERFORMANCE
+-------------
+Optimization:
+- Batch ESI requests
+- Minimize API calls
+- Cache responses
+- Background processing
+
+Rate Limits:
+- ESI error tracking
+- Request throttling
+- Queue management
+- Parallel processing
