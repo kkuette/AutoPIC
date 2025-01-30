@@ -403,3 +403,7 @@ FodyWeavers.xsd
 .cursorrules
 .cursorrules.json
 .cursorrules.json.bak
+
+# Images
+img/
+
