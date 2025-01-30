@@ -37,7 +37,13 @@ const CONFIG = {
     REACTIONS: 'A589:K878',
     COMPONENTS: 'A881:K1042',
     PRODUCTS: 'A1048:K2000',
-    MATERIALS: 'A505:C580'
+    MATERIALS: 'A505:P536',  // Range for materials data
+    HYBRID_REACTIONS: 'H2:K50',  // Range for hybrid reactions
+    ADVANCED_COMPONENTS: 'M2:P50',  // Range for advanced components
+    CAPITAL_COMPONENTS: 'R2:U50',  // Range for capital components
+    END_PRODUCTS: 'W2:Z50',  // Range for end products
+    OTHERS: 'AB2:AE50',  // Range for other jobs
+    CASH_FLOWS: 'AG2:AH20'  // Range for cash flow data
   },
   NAMED_RANGES: {
     DASHBOARD_STATS: 'A1:F34',
@@ -48,5 +54,13 @@ const CONFIG = {
     PRODUCTS: 'G1043',
     JOB_TYPES: 'B55:B500',
     JOB_STATUS: 'K55:K500'
+  },
+  API: {
+    RAVWORKS: {
+      BASE_URL: 'https://www.ravworks.com',
+      ENDPOINTS: {
+        PLAN: '/plan'
+      }
+    }
   }
 }; 

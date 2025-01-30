@@ -3,12 +3,7 @@ function onOpen() {
   ui.createMenu('Industry Manager')
     .addItem('Create New Project', 'createNewProject')
     .addSeparator()
-    .addSubMenu(ui.createMenu('Ravwork')
-      .addItem('Input Materials', 'UserInputs.handleMaterialInput')
-      .addSubMenu(ui.createMenu('Jobs')
-        .addItem('Input Reaction', 'UserInputs.handleReactionJobInput')
-      )
-    )
+    .addItem('Import Ravworks Project', 'UserInputs.handleRavworksImport')
     .addSeparator()
     .addItem('Setup ESI Access', 'showESIAuthDialog')
     .addToUi();
@@ -41,8 +36,7 @@ function createNewProject() {
     }
     
     const templateManager = new TemplateManager();
-    const newSheet = templateManager.createNewProject(projectName);
-    newSheet.activate();
+    templateManager.createNewProject(projectName);
   }
 }
 
@@ -224,4 +218,30 @@ function handleAuthCallback(request) {
 function clearCache() {
   Utility.clearCache();
   SpreadsheetApp.getActiveSpreadsheet().toast('Cache cleared successfully');
+}
+
+/**
+ * Debug function for testing Ravworks import
+ * Run this function directly in the Apps Script debugger
+ * @param {string} projectId - Optional project ID to test (defaults to example ID)
+ * @returns {Object} Import result
+ */
+async function debugRavworksImport(projectId = 'sWwMCuR') {
+  console.log('=== Starting Ravworks Import Debug ===');
+  console.log(`Project ID: ${projectId}`);
+  
+  try {
+    console.log('Calling processRavworksImport...');
+    const result = await UserInputs.processRavworksImport(projectId);
+    
+    console.log('\n=== Import Result ===');
+    console.log(JSON.stringify(result, null, 2));
+    
+    return result;
+  } catch (error) {
+    console.error('\n=== Import Error ===');
+    console.error('Error:', error.message);
+    console.error('Stack:', error.stack);
+    throw error;
+  }
 } 
