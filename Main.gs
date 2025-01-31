@@ -3,40 +3,186 @@ function onOpen() {
   ui.createMenu('Industry Manager')
     .addItem('Create New Project', 'createNewProject')
     .addSeparator()
-    .addItem('Import Ravworks Project', 'UserInputs.handleRavworksImport')
-    .addSeparator()
     .addItem('Setup ESI Access', 'showESIAuthDialog')
     .addToUi();
 }
 
+function getNextCoreNumber() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheets = ss.getSheets();
+  let maxCoreNumber = 0;
+  
+  sheets.forEach(sheet => {
+    const name = sheet.getName();
+    if (name.startsWith('CORE')) {
+      const number = parseInt(name.replace('CORE', ''), 10);
+      if (!isNaN(number) && number > maxCoreNumber) {
+        maxCoreNumber = number;
+      }
+    }
+  });
+  
+  return `CORE${maxCoreNumber + 1}`;
+}
+
 function createNewProject() {
   const ui = SpreadsheetApp.getUi();
-  const response = ui.prompt('Create New Project', 'Enter project name:', ui.ButtonSet.OK_CANCEL);
+  const nextCoreName = getNextCoreNumber();
   
-  if (response.getSelectedButton() === ui.Button.OK) {
-    let projectName = response.getResponseText().trim();
-    
-    if (!projectName) {
-      // Find highest CORE number
-      const ss = SpreadsheetApp.getActiveSpreadsheet();
-      const sheets = ss.getSheets();
-      let maxCoreNumber = 0;
-      
-      sheets.forEach(sheet => {
-        const name = sheet.getName();
-        if (name.startsWith('CORE')) {
-          const number = parseInt(name.replace('CORE', ''), 10);
-          if (!isNaN(number) && number > maxCoreNumber) {
-            maxCoreNumber = number;
-          }
+  const html = HtmlService.createHtmlOutput(`
+    <style>
+      body {
+        font-family: Roboto, Arial, sans-serif;
+        margin: 0;
+        padding: 16px;
+      }
+      .form-group {
+        margin-bottom: 16px;
+      }
+      label {
+        display: block;
+        font-size: 13px;
+        color: #5f6368;
+        margin-bottom: 4px;
+      }
+      input {
+        width: 100%;
+        padding: 6px 8px;
+        border: 1px solid #dadce0;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 14px;
+        color: #202124;
+      }
+      input:focus {
+        outline: none;
+        border-color: #1a73e8;
+      }
+      input::placeholder {
+        color: #80868b;
+        font-size: 14px;
+      }
+      .buttons {
+        text-align: right;
+        margin-top: 16px;
+      }
+      button {
+        font-family: 'Google Sans', Roboto, Arial, sans-serif;
+        font-size: 14px;
+        padding: 8px 24px;
+        margin-left: 8px;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+      }
+      .cancel {
+        background: transparent;
+        color: #1a73e8;
+      }
+      .cancel:hover {
+        background: rgba(26,115,232,0.04);
+      }
+      .submit {
+        background: #1a73e8;
+        color: white;
+      }
+      .submit:hover {
+        background: #1557b0;
+        box-shadow: 0 1px 2px 0 rgba(66,133,244,0.3),
+                    0 1px 3px 1px rgba(66,133,244,0.15);
+      }
+      .loading {
+        display: none;
+        text-align: center;
+        padding: 20px 0;
+      }
+      .loading-spinner {
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #1a73e8;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 16px;
+      }
+      .loading-text {
+        color: #5f6368;
+        font-size: 14px;
+        margin-bottom: 8px;
+      }
+      .loading-step {
+        color: #80868b;
+        font-size: 13px;
+        margin: 4px 0;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+    <form id="projectForm" onsubmit="handleSubmit(event)">
+      <div class="form-group">
+        <label for="projectName">Project name</label>
+        <input type="text" id="projectName" name="projectName" 
+               placeholder="Enter custom name or leave empty for ${nextCoreName}">
+      </div>
+      <div class="form-group">
+        <label for="ravworksLink">Ravworks link (optional)</label>
+        <input type="text" id="ravworksLink" name="ravworksLink" 
+               placeholder="e.g. https://ravworks.com/project/sWwMCuR">
+      </div>
+      <div class="buttons">
+        <button type="button" class="cancel" onclick="google.script.host.close()">Cancel</button>
+        <button type="submit" class="submit">OK</button>
+      </div>
+    </form>
+    <div id="loading" class="loading">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Creating project...</div>
+      <div id="loadingSteps">
+        <div class="loading-step">• Creating project template</div>
+        <div class="loading-step" id="ravworksStep" style="display: none">• Importing Ravworks data</div>
+      </div>
+    </div>
+    <script>
+      function showLoading(hasRavworks) {
+        document.getElementById('projectForm').style.display = 'none';
+        document.getElementById('loading').style.display = 'block';
+        if (hasRavworks) {
+          document.getElementById('ravworksStep').style.display = 'block';
         }
-      });
+      }
       
-      projectName = `CORE${maxCoreNumber + 1}`;
+      function handleSubmit(e) {
+        e.preventDefault();
+        const projectName = document.getElementById('projectName').value.trim();
+        const ravworksLink = document.getElementById('ravworksLink').value.trim();
+        showLoading(!!ravworksLink);
+        google.script.run
+          .withSuccessHandler(() => google.script.host.close())
+          .handleProjectCreation(projectName, ravworksLink);
+      }
+    </script>
+  `).setWidth(400).setHeight(220);
+  
+  ui.showModalDialog(html, 'Create New Project');
+}
+
+function handleProjectCreation(projectName, ravworksLink) {
+  if (!projectName) {
+    projectName = getNextCoreNumber();
+  }
+  
+  const templateManager = new TemplateManager();
+  templateManager.createNewProject(projectName);
+  
+  // Process Ravworks import if link was provided
+  if (ravworksLink) {
+    // Extract project ID from link if provided
+    const projectId = ravworksLink.split('/').pop();
+    if (projectId) {
+      UserInputs.processRavworksImport(projectId);
     }
-    
-    const templateManager = new TemplateManager();
-    templateManager.createNewProject(projectName);
   }
 }
 
