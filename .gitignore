@@ -400,9 +400,7 @@ FodyWeavers.xsd
 *.sln.iml
 
 # Cursor
-.cursorrules
-.cursorrules.json
-.cursorrules.json.bak
+.cursor/
 
 # Images
 img/
