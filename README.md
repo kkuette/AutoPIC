@@ -8,7 +8,7 @@ A Google Apps Script-based industry management system for EVE Online corporation
 - [Usage Guide](#usage-guide)
 - [Project Structure](#project-structure)
 - [Fee Structure](#fee-structure)
-- [Contributing](#contributing)
+- [Technical Architecture](#technical-architecture)
 - [Security](#security)
 - [Support](#support)
 - [License](#license)
@@ -18,15 +18,17 @@ A Google Apps Script-based industry management system for EVE Online corporation
 ### Project Management
 - Create and manage multiple industrial projects from templates
 - Automatic project naming convention (CORE1, CORE2, etc.)
-- Comprehensive project dashboard for overview and analytics
-- Real-time progress tracking and status updates
+- Comprehensive project dashboard with real-time metrics
+- Integrated Ravworks project import functionality
+- Protected formula ranges and data validation
 
 ### ESI Integration
-- Secure EVE Online SSO authentication
+- Secure EVE Online SSO authentication with token management
 - Real-time data synchronization with EVE servers
 - Automated job tracking and monitoring
 - Asset and material inventory synchronization
 - Corporation structure integration
+- Cached API responses for performance optimization
 
 ### Material Management
 - Streamlined material input through the Ravwork menu
@@ -34,6 +36,7 @@ A Google Apps Script-based industry management system for EVE Online corporation
 - Automatic market price updates and tracking
 - Comprehensive material usage and inventory monitoring
 - Real-time stock level alerts
+- Material conflict detection and resolution
 
 ### Job Management
 - Support for multiple industrial activities:
@@ -45,6 +48,7 @@ A Google Apps Script-based industry management system for EVE Online corporation
 - Real-time job status monitoring
 - ESI-based job synchronization
 - Efficiency tracking and optimization
+- Unauthorized job detection and alerts
 
 ## Getting Started
 
@@ -71,8 +75,9 @@ A Google Apps Script-based industry management system for EVE Online corporation
 ### Project Creation
 1. Access "Industry Manager" > "Create New Project"
 2. Enter project name (optional - system will auto-generate if left blank)
-3. System will generate a new project sheet from the template
-4. Configure project-specific settings as needed
+3. Optionally provide a Ravworks project URL for automatic import
+4. System will generate a new project sheet from the template
+5. Configure project-specific settings as needed
 
 ### Material Management
 1. Navigate to "Industry Manager" > "Ravwork" > "Input Materials"
@@ -82,12 +87,14 @@ A Google Apps Script-based industry management system for EVE Online corporation
    ```
 3. Select "Import Materials" to process the data
 4. Review and confirm material allocations
+5. System will automatically validate and track material usage
 
 ### Job Management
 1. Access "Industry Manager" > "Ravwork" > "Jobs"
 2. Select the appropriate job category
 3. Input job specifications following the template format
 4. Monitor job progress through ESI synchronization
+5. System will automatically calculate fees and track completion
 
 ## Fee Structure
 
@@ -106,40 +113,61 @@ A Google Apps Script-based industry management system for EVE Online corporation
 - Ships: 2,500,000 ISK/run
 - Capital Ships: 125,000 ISK/run
 
-## Project Structure
+## Technical Architecture
 
 ### Core Components
-- `ESIManager`: EVE Online API integration handler
-- `JobManager`: Industrial job management system
-- `MaterialTracker`: Asset and material tracking
-- `MarketManager`: Price management and updates
-- `TemplateManager`: Project template system
-- `UserInputs`: Input processing and validation
-- `ContributorManager`: Contributor tracking
-- `RewardCalculator`: Fee and reward computation
+- `ESIManager`: EVE Online API integration with token management and caching
+- `JobManager`: Industrial job tracking and fee calculation
+- `MaterialTracker`: Asset tracking and inventory management
+- `MarketManager`: Price updates and market data synchronization
+- `TemplateManager`: Project template handling and sheet protection
+- `UserInputs`: Data validation and input processing
+- `ContributorManager`: Activity tracking and reward calculation
+- `AlertManager`: Notification system for various events
+- `JobSyncManager`: ESI job synchronization and validation
+- `RewardCalculator`: Fee and profit distribution computation
+- `RavworksManager`: External project import and parsing
 
-### Spreadsheet Organization
-- Dashboard: Central project overview and metrics
-- BPC/BPO: Blueprint management interface
-- Reactions: Reaction job tracking system
-- Components: Component production management
-- Products: Final product assembly tracking
-- Materials: Material inventory and management
+### Data Management
+- Efficient caching system for API responses
+- Batch operations for sheet updates
+- Protected ranges for critical formulas
+- Automatic data validation and sanitization
+- Regular cache invalidation and cleanup
+
+### Spreadsheet Structure
+- Dashboard: Real-time metrics and project overview
+- BPC/BPO: Blueprint management and tracking
+- Reactions: Reaction job monitoring
+- Components: Component production tracking
+- Products: Final product assembly management
+- Materials: Inventory and usage tracking
+- Activity Log: Contributor activity monitoring
+- Alerts: System notifications and warnings
 
 ## Security
 
 ### Data Protection
-- Secure ESI token storage and management
+- Secure ESI token storage using Google's PropertyService
 - Role-based access control via EVE Online permissions
 - Input validation and sanitization
 - Regular security audits and updates
 - Encrypted data transmission
+- Protected formula ranges
 
 ### Access Control
 - Restricted access based on EVE Online roles
 - Multi-level permission system
 - Activity logging and monitoring
 - Regular access reviews
+- Automated unauthorized access detection
+
+### Error Handling
+- Comprehensive error logging
+- Graceful failure handling
+- User-friendly error messages
+- Automatic retry mechanisms
+- Data consistency checks
 
 ## Support
 
@@ -148,12 +176,15 @@ A Google Apps Script-based industry management system for EVE Online corporation
 2. Contact system administrators
 3. Submit detailed bug reports
 4. Join the support channel
+5. Check the activity log for issues
 
 ### Troubleshooting
-- Check ESI token status
-- Verify role permissions
-- Review error logs
+- Check ESI token status and permissions
+- Verify role assignments
+- Review error logs and alerts
 - Validate input data format
+- Monitor job synchronization status
+- Check material availability and conflicts
 
 ## License
 This project is proprietary and confidential.
