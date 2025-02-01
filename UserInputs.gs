@@ -248,25 +248,33 @@ class MaterialProcessor extends DataProcessor {
     const startRow = this.range.getRow() + 1; // Skip header
     const startColumn = this.range.getColumn();
     const templateRow = startRow;
-    const lastColumn = this.sheet.getLastColumn();
+    const totalColumns = this.range.getLastColumn() - this.range.getColumn() + 1; // Use full range width
     
-    // Store existing formulas from the entire range
-    const fullRange = this.sheet.getRange(startRow, 1, this.sheet.getLastRow() - startRow + 1, lastColumn);
-    const existingFormulas = this.getFormulas(fullRange);
+    // Get template formatting
+    const templateRange = this.sheet.getRange(templateRow, startColumn, 1, totalColumns);
+
+    // get data columns
+    const dataColumns = processedData[0]?.length || 0;
     
-    // Clear only the first 3 columns while preserving header
+    // Clear data while preserving header
     if (hasExistingData) {
-      const clearRange = this.sheet.getRange(startRow, startColumn, this.range.getHeight() - 1, 3);
+      const clearRange = this.sheet.getRange(startRow, startColumn, this.range.getHeight() - 1, dataColumns);
       clearRange.clearContent();
     }
+
+    // Copy template formatting for all columns
+    templateRange.copyTo(
+      this.sheet.getRange(
+        startRow,
+        startColumn,
+        processedData.length,
+        totalColumns
+      )
+    );
 
     // Write the new data (only first 3 columns)
     const writeRange = this.sheet.getRange(startRow, startColumn, processedData.length, 3);
     writeRange.setValues(processedData);
-
-    // Copy formatting for the first 3 columns
-    const templateRange = this.sheet.getRange(templateRow, startColumn, 1, 3);
-    templateRange.copyFormatToRange(this.sheet, startColumn, startColumn + 2, startRow, startRow + processedData.length - 1);
 
     // Apply number formatting for the first 3 columns
     const formats = {
@@ -511,7 +519,17 @@ class JobProcessor extends DataProcessor {
 
       // Sort subcategories alphabetically and create new sorted data array
       const sortedData = Array.from(subcategories.entries())
-        .sort(([catA], [catB]) => catA.localeCompare(catB))
+        .sort(([catA], [catB]) => {
+          // For BPC_BPO type, ensure PRODUCTS are at the end
+          if (this.jobType === 'BPC_BPO') {
+            const isProductA = catA.toLowerCase().includes('product');
+            const isProductB = catB.toLowerCase().includes('product');
+            if (isProductA !== isProductB) {
+              return isProductA ? 1 : -1; // Products go to the end
+            }
+          }
+          return catA.localeCompare(catB);
+        })
         .flatMap(([subcategory, items]) => items.map(item => ({
           data: item.data,
           subcategory
@@ -568,7 +586,6 @@ class JobProcessor extends DataProcessor {
           remunerationCell.setFormula(formula);
           remunerationCell.setNumberFormat('#,##0.00');
         });
-        //SpreadsheetApp.flush();
       } else {
         // Standard number formatting for other job types
         const formats = {
@@ -747,12 +764,27 @@ class UserInputs {
       Logger.log(`[UserInputs] Job categorization complete. Total jobs: ${totalJobs}`);
       Logger.log(`[UserInputs] Jobs by category - Reactions: ${Array.from(mappedJobs.reactions.values()).flat().length}, Components: ${Array.from(mappedJobs.components.values()).flat().length}, Products: ${Array.from(mappedJobs.products.values()).flat().length}`);
 
-      // Process blueprints for components
+      // Process blueprints for components and products
       const bpcJobs = new Map();
       
-      // First, consolidate runs by component name
+      // First, consolidate runs by item name
       const consolidatedRuns = new Map();
+      // Process components
       for (const [category, jobs] of mappedJobs.components.entries()) {
+        for (const job of jobs) {
+          const key = job.name;
+          if (!consolidatedRuns.has(key)) {
+            consolidatedRuns.set(key, {
+              name: job.name,
+              runs: 0,
+              category: category
+            });
+          }
+          consolidatedRuns.get(key).runs += job.runs;
+        }
+      }
+      // Process products
+      for (const [category, jobs] of mappedJobs.products.entries()) {
         for (const job of jobs) {
           const key = job.name;
           if (!consolidatedRuns.has(key)) {

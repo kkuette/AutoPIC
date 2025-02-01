@@ -21,7 +21,7 @@ const CONFIG = {
   },
   FEES: {
     DAILY_LOCATION: `B15`,
-    RUN_RATES: `$A$15:$B$22`
+    RUN_RATES: `A15:B22`
   },
   RANGES: {
     DASHBOARD: 'A1:F53',
@@ -29,7 +29,7 @@ const CONFIG = {
     REACTIONS: 'A589:F590',
     COMPONENTS: 'A881:F882',
     PRODUCTS: 'A1048:F1049',
-    MATERIALS: 'A505:P536',
+    MATERIALS: 'A505:P510',
   },
   NAMED_RANGES: {
     DASHBOARD_STATS: 'A1:F34',
